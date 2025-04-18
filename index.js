@@ -6,14 +6,14 @@ const fs = require("fs");
 const { exec } = require("child_process");
 const path = require("path");
 
-// 🔐 Load Gemini API key
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
-  console.error("❌ GEMINI_API_KEY is missing in your .env file.");
+  console.error(" GEMINI_API_KEY is missing in your .env file.");
   process.exit(1);
 }
 
-// 🛠️ CLI Tools
+//  CLI Tools
 const tools = {
   list_files: {
     description: "List all files and folders in the current directory.",
@@ -38,7 +38,7 @@ const tools = {
       let content = fs.readFileSync(path, "utf-8");
       content = content.replace(new RegExp(oldStr, "g"), newStr);
       fs.writeFileSync(path, content);
-      return `✏️ Successfully edited '${path}'`;
+      return ` Successfully edited '${path}'`;
     },
   },
 
@@ -47,7 +47,7 @@ const tools = {
     func: ({ path, content }) => {
       fs.mkdirSync(require("path").dirname(path), { recursive: true });
       fs.writeFileSync(path, content);
-      return `📁 Created ${path}`;
+      return ` Created ${path}`;
     },
   },
 
@@ -64,7 +64,6 @@ const tools = {
   },
 };
 
-// 🧠 Gemini system instructions
 const systemPrompt = `
 You are a CLI coding agent. Your job is to assist the user by analyzing their input and using the right tools.
 
@@ -102,7 +101,7 @@ No need for extra explanation or code. If the user message isn’t actionable, j
 
 const conversation = [{ role: "assistant", content: systemPrompt }];
 
-// 🔁 Communicate with Gemini
+
 async function chatWithGemini() {
   const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -119,7 +118,7 @@ async function chatWithGemini() {
     });
     return res.data.candidates[0].content.parts[0].text.trim();
   } catch (error) {
-    console.error(`❌ Gemini API Error: ${error.message}`);
+    console.error(` Gemini API Error: ${error.message}`);
     if (error.response) {
       console.error("Status:", error.response.status);
       console.error("Details:", error.response.data);
@@ -128,12 +127,12 @@ async function chatWithGemini() {
   }
 }
 
-// 🧠 Handle user messages
+// Handle user messages
 async function handleInput(input) {
   conversation.push({ role: "user", content: input });
 
   const reply = await chatWithGemini();
-  console.log("\n🤖 Gemini:", reply, "\n");
+  console.log("\n Gemini:", reply, "\n");
 
   try {
     const jsonReply = reply.replace(/```json/, "").replace(/```/, "");
@@ -141,13 +140,13 @@ async function handleInput(input) {
     if (payload.tool && payload.args) {
       const { tool, args } = payload;
       if (tools[tool]) {
-        console.log(`🛠 Running tool "${tool}" with args:`, args);
+        console.log(`Running tool "${tool}" with args:`, args);
         try {
           const result = await tools[tool].func(args);
-          console.log(`✅ Tool "${tool}" result:\n${result}\n`);
+          console.log(`Tool "${tool}" result:\n${result}\n`);
           conversation.push({ role: "tool", name: tool, content: result });
         } catch (err) {
-          console.error(`💥 Tool "${tool}" error:`, err);
+          console.error(` Tool "${tool}" error:`, err);
           conversation.push({
             role: "tool",
             name: tool,
@@ -155,7 +154,7 @@ async function handleInput(input) {
           });
         }
       } else {
-        console.log(`❓ Unknown tool: ${tool}`);
+        console.log(` Unknown tool: ${tool}`);
       }
     } else if (reply.startsWith("Gemini API Error:")) {
       console.error(reply);
@@ -169,19 +168,19 @@ async function handleInput(input) {
 }
 
 // function formatError(err) {
-//   if (!err) return "Unknown error 😵‍💫";
+//   if (!err) return "Unknown error ";
 //   return err.message || String(err);
 // }
 
 
-// ⌨️ Terminal interface
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
 function promptLoop() {
-  rl.question("\n🧑 You: ", async (input) => {
+  rl.question("\n You: ", async (input) => {
     if (input.trim().toLowerCase() === "exit") {
       rl.close();
       return;
@@ -191,5 +190,5 @@ function promptLoop() {
   });
 }
 
-console.log("🚀 Welcome to the CLI Coding Agent! Type 'exit' to quit.");
+console.log("Welcome to the CLI Coding Agent! Type 'exit' to quit.");
 promptLoop();
